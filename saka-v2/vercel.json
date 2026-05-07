@@ -1,4 +1,1 @@
-{
-  "buildCommand": "npm install && node build.js",
-  "outputDirectory": "public"
-}
+{}
