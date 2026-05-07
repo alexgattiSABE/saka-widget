@@ -196,7 +196,18 @@ const r1=document.getElementById('r1'),r2=document.getElementById('r2'),r3=docum
 let client=null,active=false;
 async function startCall(){
   if(active)return;
-  statusEl.textContent='Connessione...';statusEl.className='status';
+
+  try {
+    await navigator.mediaDevices.getUserMedia({ audio: true });
+  } catch(err) {
+    statusEl.textContent='Microfono non autorizzato';
+    statusEl.className='status error';
+    return;
+  }
+
+  statusEl.textContent='Connessione...';
+  statusEl.className='status';
+
   try{
     const res=await fetch('/api/token',{method:'POST'});
     const data=await res.json();
