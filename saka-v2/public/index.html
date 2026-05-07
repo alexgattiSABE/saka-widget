@@ -8,9 +8,8 @@
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   html,body { width:100%;height:100%;overflow:hidden;background:#000;user-select:none; }
-  #bg { position:fixed;inset:0;z-index:0; }
   .ui {
-    position:fixed;inset:0;z-index:2;
+    position:fixed;inset:0;z-index:1;
     display:flex;flex-direction:column;align-items:center;justify-content:center;
     gap:0; pointer-events:none;
   }
@@ -25,10 +24,14 @@
     position:relative;cursor:pointer;pointer-events:all;
     animation:fadeUp 2s ease .3s both;
   }
+  #plasmaCanvas {
+    width:260px;height:260px;border-radius:50%;
+    display:block;
+  }
   .pulse-ring {
     position:absolute;inset:-30px;border-radius:50%;
     border:1.5px solid rgba(120,80,255,0);
-    transition:border-color .5s;
+    transition:border-color .5s;pointer-events:none;
   }
   .pulse-ring.on { border-color:rgba(120,80,255,.3); animation:pulse 2s ease-in-out infinite; }
   @keyframes pulse {
@@ -38,14 +41,13 @@
   .pulse-ring2 {
     position:absolute;inset:-55px;border-radius:50%;
     border:1px solid rgba(80,130,255,0);
-    transition:border-color .5s;
+    transition:border-color .5s;pointer-events:none;
   }
   .pulse-ring2.on { border-color:rgba(80,130,255,.15); animation:pulse 2s ease-in-out infinite .6s; }
   .sara-name {
     font-family:'Cormorant Garamond',serif;font-weight:300;font-style:italic;
     font-size:2.6rem;letter-spacing:.2em;color:rgba(255,255,255,.88);
-    margin-top:1.8rem;
-    animation:fadeUp 2s ease .6s both;
+    margin-top:1.8rem;animation:fadeUp 2s ease .6s both;
   }
   .ristorante {
     font-family:'Orbitron',monospace;font-weight:200;
@@ -58,8 +60,7 @@
     font-size:.52rem;letter-spacing:.3em;text-transform:uppercase;
     color:rgba(255,255,255,.25);margin-top:1.4rem;
     transition:color .6s ease;pointer-events:none;
-    animation:fadeUp 2s ease 1s both;
-    min-height:.8rem;
+    animation:fadeUp 2s ease 1s both;min-height:.8rem;
   }
   .status.listening{color:#88c4ff;}
   .status.speaking{color:#cc88ff;}
@@ -71,30 +72,27 @@
     animation:fadeUp 2s ease 1.2s both;
   }
   .btn-end {
-    display:none;margin-top:1rem;
-    padding:.4rem 1.4rem;border-radius:100px;
+    display:none;margin-top:1rem;padding:.4rem 1.4rem;border-radius:100px;
     border:1px solid rgba(255,255,255,.08);background:transparent;
-    color:rgba(255,255,255,.2);
-    font-family:'Orbitron',monospace;font-size:.48rem;
-    letter-spacing:.2em;text-transform:uppercase;
+    color:rgba(255,255,255,.2);font-family:'Orbitron',monospace;
+    font-size:.48rem;letter-spacing:.2em;text-transform:uppercase;
     cursor:pointer;transition:all .3s;pointer-events:all;
   }
   .btn-end:hover{border-color:rgba(255,100,100,.35);color:rgba(255,100,100,.5);}
   .btn-end.visible{display:block;}
   .footer {
-    position:fixed;bottom:1rem;
-    font-family:'Orbitron',monospace;font-size:.38rem;
-    letter-spacing:.35em;text-transform:uppercase;
+    position:fixed;bottom:1rem;font-family:'Orbitron',monospace;
+    font-size:.38rem;letter-spacing:.35em;text-transform:uppercase;
     color:rgba(255,255,255,.06);
   }
   @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 </style>
 </head>
 <body>
-<canvas id="bg"></canvas>
 <div class="ui">
   <div class="brand">Sabe — Ristorante Giapponese</div>
   <div class="orb-hit" id="orbHit">
+    <canvas id="plasmaCanvas"></canvas>
     <div class="pulse-ring" id="ring1"></div>
     <div class="pulse-ring2" id="ring2"></div>
   </div>
@@ -106,58 +104,56 @@
 </div>
 <div class="footer">Powered by Booka AI</div>
 <script>
-const canvas = document.getElementById('bg');
+const canvas = document.getElementById('plasmaCanvas');
+const SIZE = 260;
+canvas.width = SIZE; canvas.height = SIZE;
 const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-function resize() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-  if(gl) gl.viewport(0,0,canvas.width,canvas.height);
-}
-resize();
-window.addEventListener('resize', resize);
-if(!gl){ fallback2D(); } else { startWebGL(); }
-function startWebGL() {
-  const VS = `attribute vec2 a_pos; void main(){gl_Position=vec4(a_pos,0.,1.);}`;
+let isActive=false, isSpeaking=false;
+
+if(gl) {
+  const VS = `attribute vec2 a_pos;void main(){gl_Position=vec4(a_pos,0.,1.);}`;
   const FS = `
     precision highp float;
-    uniform float u_time; uniform vec2 u_res;
-    uniform float u_active; uniform float u_speaking;
+    uniform float u_time;uniform float u_active;uniform float u_speaking;
     float hash(float n){return fract(sin(n)*43758.5453);}
     float noise(vec3 p){
       vec3 i=floor(p);vec3 f=fract(p);f=f*f*(3.-2.*f);
       float n=i.x+i.y*57.+i.z*113.;
       return mix(mix(mix(hash(n),hash(n+1.),f.x),mix(hash(n+57.),hash(n+58.),f.x),f.y),
-                 mix(mix(hash(n+113.),hash(n+114.),f.x),mix(hash(n+170.),hash(n+171.),f.x),f.y),f.z);
+        mix(mix(hash(n+113.),hash(n+114.),f.x),mix(hash(n+170.),hash(n+171.),f.x),f.y),f.z);
     }
     float fbm(vec3 p){float v=0.;float a=.5;for(int i=0;i<5;i++){v+=a*noise(p);p=p*2.+vec3(.1,.2,.3);a*=.5;}return v;}
     void main(){
-      vec2 uv=(gl_FragCoord.xy-u_res*.5)/min(u_res.x,u_res.y);
+      vec2 uv=(gl_FragCoord.xy-vec2(130.))/130.;
       float dist=length(uv);
-      float R=.42;
-      float softEdge=smoothstep(R+.02,R-.01,dist);
-      if(softEdge<.001){gl_FragColor=vec4(0.);return;}
+      float R=.98;
+      float edge=smoothstep(R+.02,R-.02,dist);
+      if(edge<.001){gl_FragColor=vec4(0.);return;}
       float x=uv.x/R,y=uv.y/R;
       float z=sqrt(max(0.,1.-x*x-y*y));
       vec3 pos=vec3(x,y,z);
       float t=u_time*(1.+u_active*1.2);
-      float plasma=fbm(pos*2.5+vec3(t*.3,t*.2,t*.15))*.5+fbm(pos*3.8+vec3(-t*.2,t*.35,t*.1)+3.7)*.3+fbm(pos*1.8+vec3(t*.15,-t*.25,t*.3)+7.3)*.2;
-      plasma=plasma*1.8-.3;
+      float plasma=fbm(pos*2.5+vec3(t*.3,t*.2,t*.15))*.5
+                  +fbm(pos*3.8+vec3(-t*.2,t*.35,t*.1)+3.7)*.3
+                  +fbm(pos*1.8+vec3(t*.15,-t*.25,t*.3)+7.3)*.2;
+      plasma=clamp(plasma*1.8-.3,0.,1.);
       float sp=u_speaking;
-      vec3 c1=mix(vec3(.05,.02,.35),vec3(.1,.03,.5),sp);
-      vec3 c2=mix(vec3(.1,.2,1.),vec3(.5,.1,.9),sp);
-      vec3 c3=mix(vec3(.4,.1,.9),vec3(.8,.2,1.),sp);
-      vec3 c4=mix(vec3(.7,.3,1.),vec3(1.,.5,.8),sp);
+      vec3 c1=mix(vec3(.05,.02,.4),vec3(.12,.03,.55),sp);
+      vec3 c2=mix(vec3(.1,.25,1.),vec3(.5,.1,.95),sp);
+      vec3 c3=mix(vec3(.45,.1,.92),vec3(.82,.2,1.),sp);
+      vec3 c4=mix(vec3(.75,.35,1.),vec3(1.,.55,.85),sp);
       vec3 col;
-      if(plasma<.25) col=mix(c1,c2,plasma/.25);
-      else if(plasma<.5) col=mix(c2,c3,(plasma-.25)/.25);
-      else if(plasma<.75) col=mix(c3,c4,(plasma-.5)/.25);
+      if(plasma<.25)col=mix(c1,c2,plasma/.25);
+      else if(plasma<.5)col=mix(c2,c3,(plasma-.25)/.25);
+      else if(plasma<.75)col=mix(c3,c4,(plasma-.5)/.25);
       else col=c4;
       col+=col*smoothstep(.4,1.,plasma)*(.8+u_active*.8);
-      float streak=pow(sin(pos.x*8.+pos.y*6.+t*2.)*.5+.5,1.)*pow(sin(pos.y*10.-pos.z*4.+t*1.5)*.5+.5,1.);
-      streak=pow(streak,6.);
-      col+=mix(vec3(.3,.6,1.),vec3(.8,.3,1.),sp)*streak*(.4+u_active*.6);
-      col*=(1.-pow(1.-(1.-dist/R),3.)*.6);
-      gl_FragColor=vec4(col*softEdge*(.7+plasma*.3),softEdge*(.7+plasma*.3));
+      float streak=pow(max(0.,sin(pos.x*8.+pos.y*6.+t*2.)*.5+.5)*max(0.,sin(pos.y*10.-pos.z*4.+t*1.5)*.5+.5),6.);
+      col+=mix(vec3(.3,.6,1.),vec3(.85,.3,1.),sp)*streak*(.5+u_active*.7);
+      float rim=pow(1.-edge,3.);
+      col*=(1.-rim*.5);
+      float alpha=edge*(.75+plasma*.25);
+      gl_FragColor=vec4(col*alpha,alpha);
     }`;
   function compile(type,src){const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);return s;}
   const prog=gl.createProgram();
@@ -168,32 +164,31 @@ function startWebGL() {
   gl.bindBuffer(gl.ARRAY_BUFFER,buf);
   gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
   const loc=gl.getAttribLocation(prog,'a_pos');
-  gl.enableVertexAttribArray(loc);
-  gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
+  gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
   const uTime=gl.getUniformLocation(prog,'u_time');
-  const uRes=gl.getUniformLocation(prog,'u_res');
   const uActive=gl.getUniformLocation(prog,'u_active');
   const uSpeak=gl.getUniformLocation(prog,'u_speaking');
   gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
   let start=Date.now();
   function render(){
-    const t=(Date.now()-start)/1000;
+    gl.viewport(0,0,SIZE,SIZE);
     gl.clearColor(0,0,0,1);gl.clear(gl.COLOR_BUFFER_BIT);
-    gl.uniform1f(uTime,t);gl.uniform2f(uRes,canvas.width,canvas.height);
-    gl.uniform1f(uActive,isActive?1.:0.);gl.uniform1f(uSpeak,isSpeaking?1.:0.);
+    gl.uniform1f(uTime,(Date.now()-start)/1000);
+    gl.uniform1f(uActive,isActive?1.:0.);
+    gl.uniform1f(uSpeak,isSpeaking?1.:0.);
     gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
     requestAnimationFrame(render);
   }
   render();
 }
-function fallback2D(){const c=canvas.getContext('2d');function d(){c.fillStyle='#000';c.fillRect(0,0,canvas.width,canvas.height);requestAnimationFrame(d);}d();}
-let isActive=false,isSpeaking=false;
+
 const orbHit=document.getElementById('orbHit');
 const statusEl=document.getElementById('status');
 const btnEnd=document.getElementById('btnEnd');
 const ring1=document.getElementById('ring1');
 const ring2=document.getElementById('ring2');
 let client=null,active=false;
+
 async function startCall(){
   if(active)return;
   statusEl.textContent='Connessione...';statusEl.className='status';
