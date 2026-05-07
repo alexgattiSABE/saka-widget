@@ -3,200 +3,227 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sara — Saka Sushi</title>
-<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@300;400&family=Orbitron:wght@300;400;600&display=swap" rel="stylesheet">
+<title>Sara — Sabe Ristorante Giapponese</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;1,300&family=Orbitron:wght@200;300&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --blue:   #4FC3F7;
-    --violet: #B388FF;
-    --deep:   #7C4DFF;
-    --dark:   #05050F;
-    --glow-b: rgba(79,195,247,0.55);
-    --glow-v: rgba(179,136,255,0.45);
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { width:100%;height:100%;overflow:hidden;background:#000;user-select:none; }
+  #bg { position:fixed;inset:0;z-index:0; }
+  .ui {
+    position:fixed;inset:0;z-index:2;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:0; pointer-events:none;
   }
-  html, body {
-    width:100%; height:100%;
-    background:var(--dark);
-    display:flex; align-items:center; justify-content:center;
-    font-family:'Zen Kaku Gothic New',sans-serif;
-    overflow:hidden;
+  .brand {
+    font-family:'Orbitron',monospace;font-weight:200;
+    font-size:.58rem;letter-spacing:.55em;text-transform:uppercase;
+    color:rgba(180,140,255,.45);margin-bottom:1.8rem;
+    animation:fadeUp 2s ease forwards;
   }
-  canvas#stars { position:fixed; inset:0; z-index:0; pointer-events:none; }
-  .wrapper {
-    position:relative; z-index:1;
-    display:flex; flex-direction:column;
-    align-items:center; gap:2.5rem; padding:2rem;
+  .orb-hit {
+    width:260px;height:260px;border-radius:50%;
+    position:relative;cursor:pointer;pointer-events:all;
+    animation:fadeUp 2s ease .3s both;
   }
-  .header { text-align:center; }
-  .header .logo {
-    font-family:'Orbitron',monospace;
-    font-size:.65rem; letter-spacing:.35em;
-    color:var(--blue); opacity:.6;
-    text-transform:uppercase; margin-bottom:.5rem;
+  .pulse-ring {
+    position:absolute;inset:-30px;border-radius:50%;
+    border:1.5px solid rgba(120,80,255,0);
+    transition:border-color .5s;
   }
-  .header h1 {
-    font-family:'Orbitron',monospace;
-    font-size:1.5rem; font-weight:300; letter-spacing:.1em;
-    background:linear-gradient(135deg,var(--blue),var(--violet));
-    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  .pulse-ring.on { border-color:rgba(120,80,255,.3); animation:pulse 2s ease-in-out infinite; }
+  @keyframes pulse {
+    0%,100%{transform:scale(1);opacity:.6}
+    50%{transform:scale(1.04);opacity:1}
   }
-  .header p { margin-top:.5rem; font-size:.78rem; letter-spacing:.08em; color:rgba(255,255,255,.35); }
-  .orb-wrap { position:relative; width:220px; height:220px; display:flex; align-items:center; justify-content:center; }
-  .ring {
-    position:absolute; border-radius:50%;
-    border:1px solid var(--blue); opacity:0; transform:scale(.6);
-    animation:ringPulse 3.6s ease-out infinite;
+  .pulse-ring2 {
+    position:absolute;inset:-55px;border-radius:50%;
+    border:1px solid rgba(80,130,255,0);
+    transition:border-color .5s;
   }
-  .ring:nth-child(1){width:100%;height:100%;animation-delay:0s}
-  .ring:nth-child(2){width:130%;height:130%;animation-delay:1.2s}
-  .ring:nth-child(3){width:160%;height:160%;animation-delay:2.4s;border-color:var(--violet)}
-  @keyframes ringPulse{0%{opacity:0;transform:scale(.6)}20%{opacity:.5}100%{opacity:0;transform:scale(1.05)}}
-  .orb {
-    position:relative; z-index:2;
-    width:160px; height:160px; border-radius:50%;
-    cursor:pointer;
-    background:radial-gradient(circle at 35% 35%,rgba(255,255,255,.18) 0%,rgba(79,195,247,.25) 30%,rgba(124,77,255,.4) 65%,rgba(5,5,15,.9) 100%);
-    box-shadow:0 0 40px var(--glow-b),0 0 80px var(--glow-v),inset 0 0 30px rgba(79,195,247,.15);
-    animation:orbFloat 4s ease-in-out infinite;
-    display:flex; align-items:center; justify-content:center; overflow:hidden;
+  .pulse-ring2.on { border-color:rgba(80,130,255,.15); animation:pulse 2s ease-in-out infinite .6s; }
+  .sara-name {
+    font-family:'Cormorant Garamond',serif;font-weight:300;font-style:italic;
+    font-size:2.6rem;letter-spacing:.2em;color:rgba(255,255,255,.88);
+    margin-top:1.8rem;
+    animation:fadeUp 2s ease .6s both;
   }
-  .orb::before {
-    content:''; position:absolute; inset:0; border-radius:50%;
-    background:conic-gradient(from 0deg,transparent 0%,rgba(79,195,247,.15) 25%,transparent 50%,rgba(179,136,255,.15) 75%,transparent 100%);
-    animation:orbSpin 6s linear infinite;
+  .ristorante {
+    font-family:'Orbitron',monospace;font-weight:200;
+    font-size:.5rem;letter-spacing:.4em;text-transform:uppercase;
+    color:rgba(255,255,255,.2);margin-top:.5rem;
+    animation:fadeUp 2s ease .8s both;
   }
-  .orb::after {
-    content:''; position:absolute;
-    width:50px; height:18px; border-radius:50%;
-    background:rgba(255,255,255,.18);
-    top:28px; left:32px; transform:rotate(-30deg); filter:blur(4px);
+  .status {
+    font-family:'Orbitron',monospace;font-weight:200;
+    font-size:.52rem;letter-spacing:.3em;text-transform:uppercase;
+    color:rgba(255,255,255,.25);margin-top:1.4rem;
+    transition:color .6s ease;pointer-events:none;
+    animation:fadeUp 2s ease 1s both;
+    min-height:.8rem;
   }
-  @keyframes orbFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
-  @keyframes orbSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-  .orb-icon { position:relative; z-index:3; color:rgba(255,255,255,.7); font-size:1.8rem; transition:opacity .3s; pointer-events:none; }
-  .orb.active {
-    box-shadow:0 0 60px var(--glow-b),0 0 120px var(--glow-v),0 0 180px rgba(124,77,255,.3),inset 0 0 40px rgba(79,195,247,.2);
-    animation:orbFloat 4s ease-in-out infinite,orbPulse 1s ease-in-out infinite;
+  .status.listening{color:#88c4ff;}
+  .status.speaking{color:#cc88ff;}
+  .status.error{color:#ff8888;}
+  .hint {
+    font-family:'Cormorant Garamond',serif;font-weight:300;
+    font-size:.95rem;letter-spacing:.12em;
+    color:rgba(255,255,255,.12);margin-top:.5rem;
+    animation:fadeUp 2s ease 1.2s both;
   }
-  @keyframes orbPulse{0%,100%{transform:translateY(-5px) scale(1)}50%{transform:translateY(-15px) scale(1.06)}}
-  .bars { position:absolute; z-index:3; display:flex; align-items:center; gap:4px; opacity:0; transition:opacity .4s; }
-  .bar { width:4px; border-radius:2px; background:linear-gradient(to top,var(--blue),var(--violet)); animation:barDance .8s ease-in-out infinite alternate; }
-  .bar:nth-child(1){height:12px;animation-delay:0s}
-  .bar:nth-child(2){height:22px;animation-delay:.15s}
-  .bar:nth-child(3){height:32px;animation-delay:.3s}
-  .bar:nth-child(4){height:22px;animation-delay:.45s}
-  .bar:nth-child(5){height:12px;animation-delay:.6s}
-  @keyframes barDance{from{transform:scaleY(.4);opacity:.6}to{transform:scaleY(1.2);opacity:1}}
-  .orb.active .bars{opacity:1}
-  .orb.active .orb-icon{opacity:0}
-  .status { font-family:'Orbitron',monospace; font-size:.65rem; letter-spacing:.2em; text-transform:uppercase; color:rgba(255,255,255,.4); transition:color .4s; min-height:1rem; }
-  .status.listening{color:var(--blue)}
-  .status.speaking{color:var(--violet)}
-  .status.error{color:#ff6b6b}
-  .subtitle { font-size:.72rem; letter-spacing:.06em; color:rgba(255,255,255,.25); text-align:center; max-width:240px; line-height:1.6; }
-  .btn-end { display:none; padding:.5rem 1.4rem; border:1px solid rgba(255,255,255,.15); border-radius:100px; background:rgba(255,255,255,.04); color:rgba(255,255,255,.4); font-family:'Orbitron',monospace; font-size:.6rem; letter-spacing:.15em; text-transform:uppercase; cursor:pointer; transition:all .3s; }
-  .btn-end:hover{border-color:rgba(255,100,100,.4);color:rgba(255,100,100,.7);background:rgba(255,50,50,.05)}
-  .btn-end.visible{display:block}
-  .brand { position:fixed; bottom:1.4rem; font-family:'Orbitron',monospace; font-size:.5rem; letter-spacing:.3em; color:rgba(255,255,255,.12); text-transform:uppercase; }
+  .btn-end {
+    display:none;margin-top:1rem;
+    padding:.4rem 1.4rem;border-radius:100px;
+    border:1px solid rgba(255,255,255,.08);background:transparent;
+    color:rgba(255,255,255,.2);
+    font-family:'Orbitron',monospace;font-size:.48rem;
+    letter-spacing:.2em;text-transform:uppercase;
+    cursor:pointer;transition:all .3s;pointer-events:all;
+  }
+  .btn-end:hover{border-color:rgba(255,100,100,.35);color:rgba(255,100,100,.5);}
+  .btn-end.visible{display:block;}
+  .footer {
+    position:fixed;bottom:1rem;
+    font-family:'Orbitron',monospace;font-size:.38rem;
+    letter-spacing:.35em;text-transform:uppercase;
+    color:rgba(255,255,255,.06);
+  }
+  @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 </style>
 </head>
 <body>
-<canvas id="stars"></canvas>
-<div class="wrapper">
-  <div class="header">
-    <div class="logo">Saka Sushi — AI Concierge</div>
-    <h1>SARA</h1>
-    <p>Assistente vocale intelligente</p>
+<canvas id="bg"></canvas>
+<div class="ui">
+  <div class="brand">Sabe — Ristorante Giapponese</div>
+  <div class="orb-hit" id="orbHit">
+    <div class="pulse-ring" id="ring1"></div>
+    <div class="pulse-ring2" id="ring2"></div>
   </div>
-  <div class="orb-wrap">
-    <div class="ring"></div><div class="ring"></div><div class="ring"></div>
-    <div class="orb" id="orb">
-      <div class="bars">
-        <div class="bar"></div><div class="bar"></div><div class="bar"></div>
-        <div class="bar"></div><div class="bar"></div>
-      </div>
-      <div class="orb-icon">🎙</div>
-    </div>
-  </div>
+  <div class="sara-name">Sara</div>
+  <div class="ristorante">Assistente vocale</div>
   <div class="status" id="status">Tocca per parlare</div>
-  <div class="subtitle">Prenota un tavolo, chiedi il menu<br>o scopri gli orari — a voce.</div>
-  <button class="btn-end" id="btnEnd">Termina chiamata</button>
+  <div class="hint">Prenota · Menu · Orari</div>
+  <button class="btn-end" id="btnEnd">Termina</button>
 </div>
-<div class="brand">Powered by Booka AI</div>
-
-<script src="/retell-sdk.js"></script>
+<div class="footer">Powered by Booka AI</div>
 <script>
-// Starfield
-const canvas = document.getElementById('stars');
-const ctx = canvas.getContext('2d');
-let stars = [];
-function resize(){ canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
-resize(); window.addEventListener('resize',resize);
-for(let i=0;i<160;i++) stars.push({x:Math.random(),y:Math.random(),r:Math.random()*1.2+.2,a:Math.random(),s:(Math.random()*.3+.1)*(Math.random()<.5?1:-1)});
-function drawStars(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  stars.forEach(s=>{
-    s.a+=s.s*.005;
-    if(s.a>1){s.a=1;s.s*=-1;} if(s.a<0){s.a=0;s.s*=-1;}
-    ctx.beginPath(); ctx.arc(s.x*canvas.width,s.y*canvas.height,s.r,0,Math.PI*2);
-    ctx.fillStyle=`rgba(179,200,255,${s.a*.8})`; ctx.fill();
-  }); requestAnimationFrame(drawStars);
+const canvas = document.getElementById('bg');
+const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+function resize() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  if(gl) gl.viewport(0,0,canvas.width,canvas.height);
 }
-drawStars();
-
-// Retell
-const orb = document.getElementById('orb');
-const statusEl = document.getElementById('status');
-const btnEnd = document.getElementById('btnEnd');
-let client = null, active = false;
-
-async function startCall(){
-  if(active) return;
-  statusEl.textContent='Connessione...'; statusEl.className='status';
-  try {
-    const res = await fetch('/api/token',{method:'POST'});
-    const data = await res.json();
-    if(!data.access_token) throw new Error('Token non ricevuto');
-
-    const SDK = window.RetellSDK;
-    if(!SDK) throw new Error('SDK non caricato');
-
-    // Try different export patterns
-    const RetellWebClient = SDK.RetellWebClient || SDK.default?.RetellWebClient || SDK.default;
-    if(!RetellWebClient) throw new Error('RetellWebClient non trovato');
-
-    client = new RetellWebClient();
-
-    client.on('call_started',()=>{
-      active=true; orb.classList.add('active');
-      statusEl.textContent='In ascolto...'; statusEl.className='status listening';
-      btnEnd.classList.add('visible');
-    });
-    client.on('agent_start_talking',()=>{ statusEl.textContent='Sara sta parlando...'; statusEl.className='status speaking'; });
-    client.on('agent_stop_talking',()=>{ statusEl.textContent='In ascolto...'; statusEl.className='status listening'; });
-    client.on('call_ended',()=>endCall());
-    client.on('error',(e)=>{ console.error(e); endCall(); });
-
-    await client.startCall({ accessToken: data.access_token, sampleRate: 24000 });
-  } catch(e){
-    console.error(e);
-    statusEl.textContent='Errore: '+e.message;
-    statusEl.className='status error';
-    active=false;
+resize();
+window.addEventListener('resize', resize);
+if(!gl){ fallback2D(); } else { startWebGL(); }
+function startWebGL() {
+  const VS = `attribute vec2 a_pos; void main(){gl_Position=vec4(a_pos,0.,1.);}`;
+  const FS = `
+    precision highp float;
+    uniform float u_time; uniform vec2 u_res;
+    uniform float u_active; uniform float u_speaking;
+    float hash(float n){return fract(sin(n)*43758.5453);}
+    float noise(vec3 p){
+      vec3 i=floor(p);vec3 f=fract(p);f=f*f*(3.-2.*f);
+      float n=i.x+i.y*57.+i.z*113.;
+      return mix(mix(mix(hash(n),hash(n+1.),f.x),mix(hash(n+57.),hash(n+58.),f.x),f.y),
+                 mix(mix(hash(n+113.),hash(n+114.),f.x),mix(hash(n+170.),hash(n+171.),f.x),f.y),f.z);
+    }
+    float fbm(vec3 p){float v=0.;float a=.5;for(int i=0;i<5;i++){v+=a*noise(p);p=p*2.+vec3(.1,.2,.3);a*=.5;}return v;}
+    void main(){
+      vec2 uv=(gl_FragCoord.xy-u_res*.5)/min(u_res.x,u_res.y);
+      float dist=length(uv);
+      float R=.42;
+      float softEdge=smoothstep(R+.02,R-.01,dist);
+      if(softEdge<.001){gl_FragColor=vec4(0.);return;}
+      float x=uv.x/R,y=uv.y/R;
+      float z=sqrt(max(0.,1.-x*x-y*y));
+      vec3 pos=vec3(x,y,z);
+      float t=u_time*(1.+u_active*1.2);
+      float plasma=fbm(pos*2.5+vec3(t*.3,t*.2,t*.15))*.5+fbm(pos*3.8+vec3(-t*.2,t*.35,t*.1)+3.7)*.3+fbm(pos*1.8+vec3(t*.15,-t*.25,t*.3)+7.3)*.2;
+      plasma=plasma*1.8-.3;
+      float sp=u_speaking;
+      vec3 c1=mix(vec3(.05,.02,.35),vec3(.1,.03,.5),sp);
+      vec3 c2=mix(vec3(.1,.2,1.),vec3(.5,.1,.9),sp);
+      vec3 c3=mix(vec3(.4,.1,.9),vec3(.8,.2,1.),sp);
+      vec3 c4=mix(vec3(.7,.3,1.),vec3(1.,.5,.8),sp);
+      vec3 col;
+      if(plasma<.25) col=mix(c1,c2,plasma/.25);
+      else if(plasma<.5) col=mix(c2,c3,(plasma-.25)/.25);
+      else if(plasma<.75) col=mix(c3,c4,(plasma-.5)/.25);
+      else col=c4;
+      col+=col*smoothstep(.4,1.,plasma)*(.8+u_active*.8);
+      float streak=pow(sin(pos.x*8.+pos.y*6.+t*2.)*.5+.5,1.)*pow(sin(pos.y*10.-pos.z*4.+t*1.5)*.5+.5,1.);
+      streak=pow(streak,6.);
+      col+=mix(vec3(.3,.6,1.),vec3(.8,.3,1.),sp)*streak*(.4+u_active*.6);
+      col*=(1.-pow(1.-(1.-dist/R),3.)*.6);
+      gl_FragColor=vec4(col*softEdge*(.7+plasma*.3),softEdge*(.7+plasma*.3));
+    }`;
+  function compile(type,src){const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);return s;}
+  const prog=gl.createProgram();
+  gl.attachShader(prog,compile(gl.VERTEX_SHADER,VS));
+  gl.attachShader(prog,compile(gl.FRAGMENT_SHADER,FS));
+  gl.linkProgram(prog);gl.useProgram(prog);
+  const buf=gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+  const loc=gl.getAttribLocation(prog,'a_pos');
+  gl.enableVertexAttribArray(loc);
+  gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
+  const uTime=gl.getUniformLocation(prog,'u_time');
+  const uRes=gl.getUniformLocation(prog,'u_res');
+  const uActive=gl.getUniformLocation(prog,'u_active');
+  const uSpeak=gl.getUniformLocation(prog,'u_speaking');
+  gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+  let start=Date.now();
+  function render(){
+    const t=(Date.now()-start)/1000;
+    gl.clearColor(0,0,0,1);gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.uniform1f(uTime,t);gl.uniform2f(uRes,canvas.width,canvas.height);
+    gl.uniform1f(uActive,isActive?1.:0.);gl.uniform1f(uSpeak,isSpeaking?1.:0.);
+    gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+    requestAnimationFrame(render);
   }
+  render();
 }
-
+function fallback2D(){const c=canvas.getContext('2d');function d(){c.fillStyle='#000';c.fillRect(0,0,canvas.width,canvas.height);requestAnimationFrame(d);}d();}
+let isActive=false,isSpeaking=false;
+const orbHit=document.getElementById('orbHit');
+const statusEl=document.getElementById('status');
+const btnEnd=document.getElementById('btnEnd');
+const ring1=document.getElementById('ring1');
+const ring2=document.getElementById('ring2');
+let client=null,active=false;
+async function startCall(){
+  if(active)return;
+  statusEl.textContent='Connessione...';statusEl.className='status';
+  try{
+    const res=await fetch('/api/token',{method:'POST'});
+    const data=await res.json();
+    if(!data.access_token)throw new Error('Token non ricevuto');
+    const SDK=window.RetellSDK;
+    if(!SDK)throw new Error('SDK non caricato');
+    const RWC=SDK.RetellWebClient||SDK.default?.RetellWebClient||SDK.default;
+    if(!RWC)throw new Error('Client non trovato');
+    client=new RWC();
+    client.on('call_started',()=>{active=true;isActive=true;ring1.classList.add('on');ring2.classList.add('on');statusEl.textContent='In ascolto...';statusEl.className='status listening';btnEnd.classList.add('visible');});
+    client.on('agent_start_talking',()=>{isSpeaking=true;statusEl.textContent='Sara sta parlando...';statusEl.className='status speaking';});
+    client.on('agent_stop_talking',()=>{isSpeaking=false;statusEl.textContent='In ascolto...';statusEl.className='status listening';});
+    client.on('call_ended',()=>endCall());
+    client.on('error',(e)=>{console.error(e);endCall();});
+    await client.startCall({accessToken:data.access_token,sampleRate:24000});
+  }catch(e){console.error(e);statusEl.textContent='Errore: '+e.message;statusEl.className='status error';active=false;isActive=false;}
+}
 function endCall(){
-  if(client){ try{ client.stopCall(); }catch(e){} }
-  client=null; active=false;
-  orb.classList.remove('active');
-  statusEl.textContent='Tocca per parlare'; statusEl.className='status';
+  if(client){try{client.stopCall();}catch(e){}}
+  client=null;active=false;isActive=false;isSpeaking=false;
+  ring1.classList.remove('on');ring2.classList.remove('on');
+  statusEl.textContent='Tocca per parlare';statusEl.className='status';
   btnEnd.classList.remove('visible');
 }
-
-orb.addEventListener('click',()=>{ if(!active) startCall(); });
+orbHit.addEventListener('click',()=>{if(!active)startCall();});
 btnEnd.addEventListener('click',endCall);
 </script>
+<script src="/retell-sdk.js"></script>
 </body>
 </html>
