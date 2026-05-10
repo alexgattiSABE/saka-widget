@@ -124,7 +124,8 @@ async function startCall(){
     if(!data.access_token) throw new Error('No token');
     await loadRetellSDK();
     if(!retellClient){
-      retellClient=new RetellWebClient();
+     var SDK=window.RetellWebClient||window.Retell?.RetellWebClient||window.retellClientSdk?.RetellWebClient;
+retellClient=new SDK();
       retellClient.on('call_started',function(){callActive=true;setSphereMode('listening');startSim();});
       retellClient.on('agent_start_talking',function(){setSphereMode('speaking');});
       retellClient.on('agent_stop_talking',function(){setSphereMode('listening');});
