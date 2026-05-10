@@ -3,149 +3,237 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sabe — Demo</title>
+<title>Sara — Sabe Ristorante Giapponese</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;1,300&family=Orbitron:wght@200;300&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box;}
-html,body{width:100%;height:100%;background:#060609;display:flex;align-items:center;justify-content:center;overflow:hidden;}
-#app{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%;position:relative;background:#060609;}
-#app::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 70% at 50% 50%,rgba(0,50,120,.22) 0%,transparent 70%);pointer-events:none;}
-.header{text-align:center;margin-bottom:2rem;position:relative;z-index:3;}
-.title{font-family:monospace;font-size:1.1rem;font-weight:500;letter-spacing:.25em;color:#00d4ff;margin-bottom:.3rem;}
-.subtitle{font-family:monospace;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(0,180,220,.45);}
-#sphere-c{display:block;position:relative;z-index:2;cursor:pointer;}
-.status{font-family:monospace;font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;margin-top:1.5rem;z-index:3;position:relative;transition:color .3s;}
-.status.idle{color:rgba(0,200,255,.5);}
-.status.listening{color:#00e8a2;}
-.status.speaking{color:#00d4ff;}
-.hint{font-family:monospace;font-size:.6rem;letter-spacing:.08em;color:rgba(0,180,220,.3);margin-top:.5rem;z-index:3;position:relative;}
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { width:100%;height:100%;overflow:hidden;background:#000;user-select:none; }
+  .ui {
+    position:fixed;inset:0;z-index:1;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:0;pointer-events:none;
+  }
+  .brand {
+    font-family:'Orbitron',monospace;font-weight:300;
+    font-size:.7rem;letter-spacing:.5em;text-transform:uppercase;
+    color:rgba(0,220,180,.9);margin-bottom:1.8rem;
+    text-shadow:0 0 20px rgba(0,220,180,.8),0 0 50px rgba(0,220,180,.3);
+    animation:fadeUp 2s ease forwards;
+  }
+  .orb-wrap {
+    position:relative;width:320px;height:320px;
+    cursor:pointer;pointer-events:all;
+    animation:fadeUp 2s ease .3s both;
+    filter:drop-shadow(0 0 40px rgba(0,150,255,.5)) drop-shadow(0 0 80px rgba(0,150,255,.2));
+  }
+  #plasmaCanvas { position:absolute;inset:0;width:320px;height:320px; }
+  .ring {
+    position:absolute;border-radius:50%;
+    border:1px solid rgba(120,80,255,0);
+    transition:border-color .6s;pointer-events:none;
+  }
+  .ring1{inset:-30px;} .ring1.on{border-color:rgba(0,180,255,.3);animation:pulse 2.2s ease-in-out infinite;}
+  .ring2{inset:-60px;} .ring2.on{border-color:rgba(0,220,180,.15);animation:pulse 3s ease-in-out infinite .8s;}
+  .ring3{inset:-95px;} .ring3.on{border-color:rgba(0,200,160,.07);animation:pulse 3.8s ease-in-out infinite 1.6s;}
+  @keyframes pulse{0%,100%{transform:scale(1);opacity:.3}50%{transform:scale(1.03);opacity:1}}
+  .sara-name {
+    font-family:'Orbitron',monospace;font-weight:200;
+    font-size:2.2rem;letter-spacing:.08em;color:#fff;
+    margin-top:1.4rem;animation:fadeUp 2s ease .6s both;
+    text-shadow:0 0 30px rgba(0,200,255,.7),0 0 60px rgba(0,200,255,.3);
+  }
+  .ristorante {
+    font-family:'Orbitron',monospace;font-weight:200;
+    font-size:.52rem;letter-spacing:.45em;text-transform:uppercase;
+    color:rgba(0,200,160,.7);margin-top:.4rem;animation:fadeUp 2s ease .8s both;
+  }
+  .status {
+    font-family:'Orbitron',monospace;font-weight:300;
+    font-size:.58rem;letter-spacing:.3em;text-transform:uppercase;
+    color:rgba(255,255,255,.4);margin-top:1.3rem;
+    transition:color .5s,text-shadow .5s;pointer-events:none;
+    animation:fadeUp 2s ease 1s both;min-height:.8rem;
+  }
+  .status.listening{color:#00e5ff;text-shadow:0 0 14px rgba(0,229,255,.9);}
+  .status.speaking{color:#00ffb0;text-shadow:0 0 14px rgba(0,255,176,.9);}
+  .status.error{color:#ff6b6b;}
+  .hint{
+    font-family:'Cormorant Garamond',serif;font-weight:300;
+    font-size:1rem;letter-spacing:.15em;
+    color:rgba(255,255,255,.15);margin-top:.4rem;
+    animation:fadeUp 2s ease 1.2s both;
+  }
+  .btn-end{
+    display:none;margin-top:1rem;padding:.4rem 1.6rem;border-radius:100px;
+    border:1px solid rgba(0,180,180,.25);background:transparent;
+    color:rgba(0,200,180,.5);font-family:'Orbitron',monospace;
+    font-size:.48rem;letter-spacing:.2em;text-transform:uppercase;
+    cursor:pointer;transition:all .3s;pointer-events:all;
+  }
+  .btn-end:hover{border-color:rgba(255,80,80,.4);color:rgba(255,80,80,.6);}
+  .btn-end.visible{display:block;}
+  .footer{
+    position:fixed;bottom:1rem;font-family:'Orbitron',monospace;
+    font-size:.38rem;letter-spacing:.35em;text-transform:uppercase;
+    color:rgba(255,255,255,.05);
+  }
+  @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 </style>
 </head>
 <body>
-<div id="app">
-  <div class="header">
-    <div class="title">SABE</div>
-    <div class="subtitle">Ristorante Giapponese · Demo Interattiva</div>
+<div class="ui">
+  <div class="brand">Sabe — Ristorante Giapponese</div>
+  <div class="orb-wrap" id="orbHit">
+    <canvas id="plasmaCanvas"></canvas>
+    <div class="ring ring1" id="r1"></div>
+    <div class="ring ring2" id="r2"></div>
+    <div class="ring ring3" id="r3"></div>
   </div>
-  <canvas id="sphere-c" width="300" height="300"></canvas>
-  <div class="status idle" id="status">● sistema pronto</div>
-  <div class="hint" id="hint">Tocca per parlare con Sabe</div>
+  <div class="sara-name">SARA</div>
+  <div class="ristorante">Assistente vocale</div>
+  <div class="status" id="status">Tocca per parlare</div>
+  <div class="hint">Prenota · Menu · Orari</div>
+  <button class="btn-end" id="btnEnd">Termina</button>
 </div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<div class="footer">Powered by Booka AI</div>
 <script>
-var canvas=document.getElementById('sphere-c');
-var renderer,scene,camera,layers;
-var mode='idle',clock=0,targetLvl=0,lvl=0;
-var phi=Math.PI*(3-Math.sqrt(5));
-
-function initSphere(){
-  renderer=new THREE.WebGLRenderer({canvas:canvas,antialias:true,alpha:true});
-  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
-  renderer.setSize(300,300);
-  scene=new THREE.Scene();
-  camera=new THREE.PerspectiveCamera(55,1,0.1,100);
-  camera.position.z=3.1;
-  function makeLayer(N,radius,size,col,opac){
-    var pos=new Float32Array(N*3),base=new Float32Array(N*3),ph=new Float32Array(N);
-    for(var i=0;i<N;i++){var y=1-(i/(N-1))*2,r=Math.sqrt(Math.max(0,1-y*y)),t=phi*i,x=Math.cos(t)*r*radius,yy=y*radius,z=Math.sin(t)*r*radius;pos[i*3]=x;pos[i*3+1]=yy;pos[i*3+2]=z;base[i*3]=x;base[i*3+1]=yy;base[i*3+2]=z;ph[i]=Math.random()*Math.PI*2;}
-    var geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
-    var mat=new THREE.PointsMaterial({size:size,color:col,transparent:true,opacity:opac,sizeAttenuation:true,blending:THREE.AdditiveBlending,depthWrite:false});
-    var pts=new THREE.Points(geo,mat);scene.add(pts);return{pts:pts,geo:geo,base:base,ph:ph};
-  }
-  layers=[
-    Object.assign(makeLayer(2000,1.00,0.022,0x0088cc,0.9),{speed:1.0,baseCol:0x0088cc}),
-    Object.assign(makeLayer(1000,0.91,0.017,0x00b4e0,0.8),{speed:1.4,baseCol:0x00b4e0}),
-    Object.assign(makeLayer(500,0.76,0.014,0x00d4ff,0.75),{speed:1.9,baseCol:0x00d4ff}),
-  ];
-  tick();
-}
-
-function noise(x,y,z){return(Math.sin(x*6.28+y*3.77)*Math.cos(z*4.71+x*2.1)+Math.sin(y*5.13+z*2.69)*Math.cos(x*3.33+y*1.5))*0.5;}
-
-function tick(){
-  requestAnimationFrame(tick);clock+=0.011;lvl+=(targetLvl-lvl)*0.06;
-  var wAmp=0.038,wFreq=2.6,nAmp=0.022,rY=0.0025,rX=0.0008,scale=1.0;
-  if(mode==='idle'){wAmp=0.038+Math.sin(clock*0.4)*0.008;wFreq=2.5;nAmp=0.022;rY=0.0022;}
-  else if(mode==='listening'){wAmp=0.055+lvl*0.09;wFreq=3.8+lvl*2;nAmp=0.035+lvl*0.07;rY=0.005;scale=1+lvl*0.05;}
-  else if(mode==='speaking'){wAmp=0.09+lvl*0.20;wFreq=5.5+lvl*4;nAmp=0.065+lvl*0.16;rY=0.009;scale=1+lvl*0.12;}
-  layers.forEach(function(L,li){
-    var pos=L.geo.attributes.position.array,lt=clock*L.speed;
-    for(var i=0,n=pos.length/3;i<n;i++){var bx=L.base[i*3],by=L.base[i*3+1],bz=L.base[i*3+2],len=Math.sqrt(bx*bx+by*by+bz*bz)||1,nx=bx/len,ny=by/len,wave=Math.sin(ny*Math.PI*wFreq+lt*1.9+L.ph[i])*wAmp+Math.sin(nx*Math.PI*wFreq*0.7+lt*1.3+L.ph[i]*0.5)*wAmp*0.45+Math.sin((bx+bz)*Math.PI*wFreq*0.5+lt*2.4+L.ph[i]*0.3)*wAmp*0.3,n3=noise(bx*2.2+lt*0.35,by*2.2+lt*0.28,bz*2.2+lt*0.32)*nAmp,d=1+wave+n3;pos[i*3]=bx*d*scale;pos[i*3+1]=by*d*scale;pos[i*3+2]=bz*d*scale;}
-    L.geo.attributes.position.needsUpdate=true;
-    var tc=mode==='speaking'?(li===2?new THREE.Color(0x00e8a2):li===1?new THREE.Color(0x00b4e0):new THREE.Color(0x0066aa)):new THREE.Color(L.baseCol);
-    L.pts.material.color.lerp(tc,0.04);
-    L.pts.material.opacity=[0.9,0.8,0.72][li]+Math.sin(clock*1.6+li)*0.04;
-    L.pts.rotation.y+=rY*(1+li*0.18);L.pts.rotation.x+=rX*(1-li*0.08);L.pts.rotation.z+=rY*0.28*(li%2===0?1:-1);
-  });
-  renderer.render(scene,camera);
-}
-
-function setSphereMode(m){
-  mode=m;
-  var statusEl=document.getElementById('status');
-  var hintEl=document.getElementById('hint');
-  statusEl.className='status '+m;
-  var labels={idle:'● sistema pronto',listening:'◉ in ascolto…',speaking:'◈ Sabe sta parlando'};
-  statusEl.textContent=labels[m]||m;
-  if(m==='idle') hintEl.textContent='Tocca per parlare con Sabe';
-  else if(m==='listening') hintEl.textContent='Parla ora…';
-  else hintEl.textContent='';
-}
-
-var simTimer=null;
-function startSim(){
-  clearInterval(simTimer);
-  simTimer=setInterval(function(){
-    if(mode==='listening') targetLvl=0.1+Math.random()*0.35;
-    else if(mode==='speaking') targetLvl=0.4+Math.random()*0.6;
-    else targetLvl=0;
-  },120);
-}
-
-var retellClient=null,callActive=false;
-
-function loadRetellSDK(){
-  return new Promise(function(resolve){
-    if(window.RetellWebClient){resolve();return;}
-    var s=document.createElement('script');
-   s.src='https://cdn.jsdelivr.net/npm/retell-client-js-sdk@latest/dist/index.umd.js';
-    s.onload=function(){resolve();};
-    document.head.appendChild(s);
-  });
-}
-
-async function startCall(){
-  if(callActive){stopCall();return;}
-  setSphereMode('listening');
-  document.getElementById('hint').textContent='Connessione in corso…';
-  try{
-    var res=await fetch('/api/token',{method:'POST'});
-    var data=await res.json();
-    if(!data.access_token) throw new Error('No token');
-    await loadRetellSDK();
-    if(!retellClient){
-     var SDK=window.RetellWebClient||window.Retell?.RetellWebClient||window.retellClientSdk?.RetellWebClient;
-retellClient=new SDK();
-      retellClient.on('call_started',function(){callActive=true;setSphereMode('listening');startSim();});
-      retellClient.on('agent_start_talking',function(){setSphereMode('speaking');});
-      retellClient.on('agent_stop_talking',function(){setSphereMode('listening');});
-      retellClient.on('call_ended',function(){callActive=false;setSphereMode('idle');clearInterval(simTimer);targetLvl=0;});
-      retellClient.on('error',function(err){console.error(err);callActive=false;setSphereMode('idle');clearInterval(simTimer);targetLvl=0;});
+const canvas=document.getElementById('plasmaCanvas');
+const S=320;canvas.width=S;canvas.height=S;
+const gl=canvas.getContext('webgl')||canvas.getContext('experimental-webgl');
+let isActive=false,isSpeaking=false;
+if(gl){
+  const VS=`attribute vec2 a_pos;void main(){gl_Position=vec4(a_pos,0.,1.);}`;
+  const FS=`
+    precision highp float;
+    uniform float u_time;uniform float u_active;uniform float u_speaking;
+    float hash(float n){return fract(sin(n)*43758.5453);}
+    float noise(vec3 p){
+      vec3 i=floor(p);vec3 f=fract(p);f=f*f*(3.-2.*f);
+      float n=i.x+i.y*57.+i.z*113.;
+      return mix(mix(mix(hash(n),hash(n+1.),f.x),mix(hash(n+57.),hash(n+58.),f.x),f.y),
+        mix(mix(hash(n+113.),hash(n+114.),f.x),mix(hash(n+170.),hash(n+171.),f.x),f.y),f.z);
     }
-    await retellClient.startCall({accessToken:data.access_token});
-  }catch(err){
-    console.error('Call error:',err);
-    setSphereMode('idle');
+    float fbm(vec3 p){float v=0.;float a=.5;for(int i=0;i<7;i++){v+=a*noise(p);p=p*2.1+vec3(.3,.17,.09);a*=.48;}return v;}
+    void main(){
+      vec2 uv=(gl_FragCoord.xy-vec2(160.))/160.;
+      float dist=length(uv);float R=.97;
+      float edge=smoothstep(R+.03,R-.01,dist);
+      if(edge<.0005){gl_FragColor=vec4(0.);return;}
+      float x=uv.x/R,y=uv.y/R;
+      float z=sqrt(max(0.,1.-x*x-y*y));
+      vec3 pos=vec3(x,y,z);vec3 N=normalize(pos);
+      vec3 L1=normalize(vec3(-.55,.65,.55));
+      float d1=max(dot(N,L1),0.);
+      float s1=pow(max(dot(reflect(-L1,N),vec3(0.,0.,1.)),0.),64.);
+      vec3 L2=normalize(vec3(.7,-.2,.4));float d2=max(dot(N,L2),0.)*.3;
+      vec3 L3=normalize(vec3(.1,.1,-1.));float d3=max(dot(N,L3),0.)*.15;
+      float fresnel=pow(1.-z,2.8);
+      float spd=.8+u_active*1.2;float t=u_time*spd;
+      vec3 q=vec3(fbm(pos*1.8+vec3(t*.15,t*.12,t*.08)),fbm(pos*1.8+vec3(t*.12,-t*.1,t*.15)+2.4),fbm(pos*1.8+vec3(-t*.1,t*.13,-t*.12)+4.8));
+      vec3 r=vec3(fbm(pos*2.5+q*1.8+vec3(t*.2,t*.18,t*.14)),fbm(pos*2.5+q*1.8+vec3(t*.18,-t*.16,t*.2)+1.7),fbm(pos*2.5+q*1.8+vec3(-t*.16,t*.19,-t*.17)+3.4));
+      float plasma=fbm(pos*2.+r*2.2);
+      plasma=clamp(plasma*2.4-.55,0.,1.);
+      float detail=fbm(pos*6.+vec3(t*.3,-t*.25,t*.2));
+      detail=clamp(detail*3.-1.5,0.,1.);
+      plasma=mix(plasma,max(plasma,detail*.7),.3);
+      float sp=u_speaking;
+      vec3 void_col=vec3(0.,0.,0.);
+      vec3 deep=mix(vec3(.0,.04,.18),vec3(.0,.08,.2),sp);
+      vec3 mid1=mix(vec3(.0,.2,.6),vec3(.0,.35,.45),sp);
+      vec3 mid2=mix(vec3(.0,.55,.85),vec3(.05,.7,.6),sp);
+      vec3 bright=mix(vec3(.1,.85,1.),vec3(.1,1.,.75),sp);
+      vec3 corona=mix(vec3(.5,.95,1.),vec3(.4,1.,.85),sp);
+      vec3 white_hot=vec3(.97,.94,1.);
+      vec3 col;
+      if(plasma<.15)col=mix(void_col,deep,plasma/.15);
+      else if(plasma<.35)col=mix(deep,mid1,(plasma-.15)/.2);
+      else if(plasma<.55)col=mix(mid1,mid2,(plasma-.35)/.2);
+      else if(plasma<.72)col=mix(mid2,bright,(plasma-.55)/.17);
+      else if(plasma<.88)col=mix(bright,corona,(plasma-.72)/.16);
+      else col=mix(corona,white_hot,(plasma-.88)/.12);
+      float lum=smoothstep(.4,1.,plasma);
+      col*=(1.+lum*(1.5+u_active*1.2));
+      float f1=sin(pos.x*14.+pos.y*11.+t*3.)*.5+.5;
+      float f2=sin(pos.y*16.-pos.z*8.+t*2.5)*.5+.5;
+      float f3=cos(pos.z*12.+pos.x*9.-t*2.)*.5+.5;
+      float fil=pow(pow(f1*f2,.5)*pow(f3,.3),4.)*(1.5+u_active*1.5);
+      col+=mix(vec3(.2,.8,1.),vec3(.1,1.,.7),sp)*fil;
+      col*=(.12+d1*.7+d2+d3);
+      col+=mix(vec3(.3,.7,1.),vec3(.2,1.,.8),sp)*s1*.8;
+      col+=mix(vec3(.0,.5,.9),vec3(.0,.9,.7),sp)*fresnel*(.6+u_active*.5);
+      col+=vec3(.9,.85,1.)*pow(max(dot(N,normalize(vec3(-.4,.55,.75))),0.),80.)*.5;
+      col*=(.6+smoothstep(.0,.4,z)*smoothstep(1.,.6,z)*.4);
+      col=max(col,vec3(0.));
+      float alpha=edge*(smoothstep(.0,.4,plasma)*.7+plasma*.3);
+      gl_FragColor=vec4(col,alpha);
+    }`;
+  function compile(type,src){const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);return s;}
+  const prog=gl.createProgram();
+  gl.attachShader(prog,compile(gl.VERTEX_SHADER,VS));
+  gl.attachShader(prog,compile(gl.FRAGMENT_SHADER,FS));
+  gl.linkProgram(prog);gl.useProgram(prog);
+  const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+  const loc=gl.getAttribLocation(prog,'a_pos');
+  gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
+  const uTime=gl.getUniformLocation(prog,'u_time');
+  const uActive=gl.getUniformLocation(prog,'u_active');
+  const uSpeak=gl.getUniformLocation(prog,'u_speaking');
+  gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+  let start=Date.now();
+  function render(){
+    gl.viewport(0,0,S,S);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.uniform1f(uTime,(Date.now()-start)/1000);
+    gl.uniform1f(uActive,isActive?1.:0.);gl.uniform1f(uSpeak,isSpeaking?1.:0.);
+    gl.drawArrays(gl.TRIANGLE_STRIP,0,4);requestAnimationFrame(render);
   }
+  render();
 }
+const orbHit=document.getElementById('orbHit');
+const statusEl=document.getElementById('status');
+const btnEnd=document.getElementById('btnEnd');
+const r1=document.getElementById('r1'),r2=document.getElementById('r2'),r3=document.getElementById('r3');
+let client=null,active=false;
+async function startCall(){
+  if(active)return;
 
-function stopCall(){
-  if(retellClient&&callActive) retellClient.stopCall();
-  callActive=false;setSphereMode('idle');clearInterval(simTimer);targetLvl=0;
+  try {
+    await navigator.mediaDevices.getUserMedia({ audio: true });
+  } catch(err) {
+    statusEl.textContent='Microfono non autorizzato';
+    statusEl.className='status error';
+    return;
+  }
+
+  statusEl.textContent='Connessione...';
+  statusEl.className='status';
+
+  try{
+    const res=await fetch('/api/token',{method:'POST'});
+    const data=await res.json();
+    if(!data.access_token)throw new Error('Token non ricevuto');
+    const SDK=window.RetellSDK;
+    if(!SDK)throw new Error('SDK non caricato');
+    const RWC=SDK.RetellWebClient||SDK.default?.RetellWebClient||SDK.default;
+    if(!RWC)throw new Error('Client non trovato');
+    client=new RWC();
+    client.on('call_started',()=>{active=true;isActive=true;r1.classList.add('on');r2.classList.add('on');r3.classList.add('on');statusEl.textContent='In ascolto...';statusEl.className='status listening';btnEnd.classList.add('visible');});
+    client.on('agent_start_talking',()=>{isSpeaking=true;statusEl.textContent='Sara sta parlando...';statusEl.className='status speaking';});
+    client.on('agent_stop_talking',()=>{isSpeaking=false;statusEl.textContent='In ascolto...';statusEl.className='status listening';});
+    client.on('call_ended',()=>endCall());
+    client.on('error',(e)=>{console.error(e);endCall();});
+    await client.startCall({accessToken:data.access_token,sampleRate:24000});
+  }catch(e){console.error(e);statusEl.textContent='Errore: '+e.message;statusEl.className='status error';active=false;isActive=false;}
 }
-
-canvas.addEventListener('click',function(){startCall();});
-initSphere();
+function endCall(){
+  if(client){try{client.stopCall();}catch(e){}}
+  client=null;active=false;isActive=false;isSpeaking=false;
+  r1.classList.remove('on');r2.classList.remove('on');r3.classList.remove('on');
+  statusEl.textContent='Tocca per parlare';statusEl.className='status';btnEnd.classList.remove('visible');
+}
+orbHit.addEventListener('click',()=>{if(!active)startCall();});
+btnEnd.addEventListener('click',endCall);
 </script>
+<script src="/retell-sdk.js"></script>
 </body>
 </html>
