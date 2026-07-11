@@ -215,7 +215,10 @@ let client=null,active=false;
 async function startCall(){
   if(active)return;
   try {
-    await navigator.mediaDevices.getUserMedia({ audio: true });
+    // Solo probe del permesso: chiudi subito lo stream (l'SDK Retell apre il suo),
+    // altrimenti l'indicatore del microfono resta acceso anche a chiamata finita
+    const probe = await navigator.mediaDevices.getUserMedia({ audio: true });
+    probe.getTracks().forEach(t => t.stop());
   } catch(err) {
     statusEl.textContent='Microfono non autorizzato';
     statusEl.className='status error';
