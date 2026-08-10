@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sara — Sabe Ristorante Giapponese</title>
+<title>Alex — Sabe Ristorante Giapponese</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
 html,body { width:100%;height:100%;overflow:hidden;background:#05030f;user-select:none; }
@@ -91,7 +91,7 @@ html,body { width:100%;height:100%;overflow:hidden;background:#05030f;user-selec
     <div class="ring ring2" id="r2"></div>
     <div class="ring ring3" id="r3"></div>
   </div>
-  <div class="sara-name">SARA</div>
+  <div class="sara-name">ALEX</div>
   <div class="ristorante">Assistente vocale</div>
   <div class="status" id="status">Tocca per parlare</div>
   <div class="hint">Prenota · Menu · Orari</div>
@@ -243,7 +243,7 @@ async function startCall(){
       window.setSphereMode('listening');
     });
     client.on('agent_start_talking',()=>{
-      statusEl.textContent='Sara sta parlando...';statusEl.className='status speaking';
+      statusEl.textContent='Alex sta parlando...';statusEl.className='status speaking';
       window.setSphereMode('speaking');
     });
     client.on('agent_stop_talking',()=>{
